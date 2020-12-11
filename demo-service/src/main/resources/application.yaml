@@ -1,0 +1,7 @@
+eureka:
+  instance:
+    statusPageUrlPath: /actuator/info
+    healthCheckUrlPath: /actuator/health
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/

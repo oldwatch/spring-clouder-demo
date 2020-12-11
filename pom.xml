@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>net.demo-spring-cloud</groupId>
+    <artifactId>spring-cloud-demo</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>config-service</module>
+        <module>demo-service</module>
+    </modules>
+    <packaging>pom</packaging>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>2.3.3.RELEASE</version>
+<!--        <relativePath/> &lt;!&ndash; lookup parent from repository &ndash;&gt;-->
+    </parent>
+
+    <properties>
+        <spring.cloud-version>Hoxton.SR8</spring.cloud-version>
+        <java.version>11</java.version>
+        <skipTests>true</skipTests>
+        <maven.deploy.skip>true</maven.deploy.skip>
+        <spring.version>2.3.3.RELEASE</spring.version>
+    </properties>
+
+
+    <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-config</artifactId>-->
+<!--        </dependency>-->
+
+
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.cloud</groupId>-->
+<!--            <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>-->
+<!--        </dependency>-->
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>io.projectreactor</groupId>
+            <artifactId>reactor-tools</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>28.1-jre</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring.cloud-version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>${spring.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>3.2.0</version>
+                    <configuration>
+                        <archive>
+                            <index>true</index>
+                            <manifestSections>
+                                <manifestSection>
+                                    <name>compile</name>
+                                    <manifestEntries>
+                                        <timestamp>${maven.build.timestamp}</timestamp>
+                                    </manifestEntries>
+                                </manifestSection>
+                            </manifestSections>
+                        </archive>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.8.1</version>
+                    <configuration>
+                        <compilerArgs>
+                            <arg>-Xlint:unchecked</arg>
+                        </compilerArgs>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                            <path>
+                                <groupId>org.springframework.boot</groupId>
+                                <artifactId>spring-boot-configuration-processor</artifactId>
+                                <version>${spring.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.6.0</version>
+                    <configuration>
+                        <!--                                <executable>docker</executable>-->
+                        <!--                                <arguments>-->
+                        <executable>wsl</executable>
+                        <arguments>
+                            <argument>docker</argument>
+                            <argument>build</argument>
+                            <argument>-t</argument>
+                            <argument>localhost:5000/local/${project.artifactId}</argument>
+                            <argument>--build-arg</argument>
+                            <argument>JAR=${project.artifactId}.jar</argument>
+                            <argument>--build-arg</argument>
+                            <argument>PROFILE=docker</argument>
+                            <argument>.</argument>
+                        </arguments>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>docker</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+    </build>
+
+
+</project>

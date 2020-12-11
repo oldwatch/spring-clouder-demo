@@ -1,0 +1,9 @@
+.*
+!.gitignore
+!.editconfig
+
+*-local.properties
+
+**/*.iml
+
+target
