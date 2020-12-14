@@ -5,18 +5,20 @@ import org.springframework.boot.WebApplicationType;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.client.RestTemplate;
 
+@EnableFeignClients
 @Configuration
 @EnableScheduling
 @SpringBootApplication
 public class ClientApplication {
 
     public static void main(String[] args) {
-        SpringApplication application=new SpringApplicationBuilder(ClientApplication.class).web(WebApplicationType.REACTIVE).build();
+        SpringApplication application=new SpringApplicationBuilder(ClientApplication.class).web(WebApplicationType.SERVLET).build();
 
         application.run(args);
 

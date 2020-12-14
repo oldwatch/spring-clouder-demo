@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -34,10 +33,10 @@ public class EchoController {
 
 
     @GetMapping(path="/mock/hello/{value}")
-    public Mono<EchoEntry> echo(@PathVariable String value){
+    public Mono<EchoInfoEntry> echo(@PathVariable String value){
 
         return Mono.just(value).map(str->{
-            EchoEntry entry=new EchoEntry();
+            EchoInfoEntry entry=new EchoInfoEntry();
             entry.setName(System.getenv("DOCKER_HOST"));
             entry.setStr("Hello "+str);
             return entry;
@@ -46,7 +45,7 @@ public class EchoController {
     }
 
     @Data
-    public static class EchoEntry{
+    public static class EchoInfoEntry{
 
         private String str;
 

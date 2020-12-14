@@ -1,10 +1,9 @@
 package net.demo.springcloud.client.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
+import net.demo.springcloud.client.entity.EchoEntry;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
 
 import java.util.Map;
 
@@ -12,22 +11,20 @@ import java.util.Map;
 @Component
 public class DemoService {
 
-    @Value("${demo.client.service_host}")
-    private String serviceHost;
 
+    private final EchoClient echoClient;
 
-    private final RestTemplate  template;
+    public DemoService(EchoClient echoClient){
 
-    public DemoService(RestTemplate template) {
-        this.template = template;
+        this.echoClient = echoClient;
     }
 
     @Scheduled(fixedRateString = "PT1M")
     public void task(){
 
-        Map<String,String> values=template.getForObject("http://"+serviceHost+":8080/mock/hello/world",Map.class);
+        EchoEntry entry =echoClient.doEcho("world");
 
-        log.info(" values : {}",values);
+        log.info(" values : {}",entry);
 
     }
 }
