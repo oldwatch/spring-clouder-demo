@@ -1,14 +1,15 @@
 spring:
   application:
     name: demo-service
-management:
-  context-path: manager
 eureka:
   instance:
-    statusPageUrlPath: ${management.context-path}/info
-    healthCheckUrlPath: ${management.context-path}/health
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    statusPageUrlPath: actuator/info
+    healthCheckUrlPath: actuator/health
     hostname: ${DOCKER_HOST}
     prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
   client:
     serviceUrl:
       defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/

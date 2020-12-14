@@ -1,6 +1,14 @@
 server:
   port: 8761
 spring:
+  application:
+    name: eureka-service
   freemarker:
     template-loader-path: classpath:/templates/
     prefer-file-system-access: false
+eureka:
+  instance:
+    instanceId: ${spring.application.name}:${spring.application.instance_id:${random.value}}
+    prefer-ip-address: true
+  server:
+    enable-self-preservation: false
