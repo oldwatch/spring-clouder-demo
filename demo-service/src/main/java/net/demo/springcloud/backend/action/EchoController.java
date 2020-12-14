@@ -5,12 +5,15 @@ import com.google.common.collect.Maps;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.util.MultiValueMap;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,6 +32,26 @@ public class EchoController {
     public EchoController() {
     }
 
+
+    @GetMapping(path="/mock/hello/{value}")
+    public Mono<EchoEntry> echo(@PathVariable String value){
+
+        return Mono.just(value).map(str->{
+            EchoEntry entry=new EchoEntry();
+            entry.setName(System.getenv("DOCKER_HOST"));
+            entry.setStr("Hello "+str);
+            return entry;
+        });
+
+    }
+
+    @Data
+    public static class EchoEntry{
+
+        private String str;
+
+        private String name;
+    }
 
 
     @RequestMapping(path = "/mock/request/**", consumes = MediaType.ALL_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)

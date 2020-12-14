@@ -1,7 +1,16 @@
+spring:
+  application:
+    name: demo-service
+management:
+  context-path: manager
 eureka:
   instance:
-    statusPageUrlPath: /actuator/info
-    healthCheckUrlPath: /actuator/health
+    statusPageUrlPath: ${management.context-path}/info
+    healthCheckUrlPath: ${management.context-path}/health
+    hostname: ${DOCKER_HOST}
+    prefer-ip-address: true
   client:
     serviceUrl:
       defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/
+    healthcheck:
+      enabled: true

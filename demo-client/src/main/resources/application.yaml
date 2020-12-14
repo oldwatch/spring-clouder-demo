@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: demo-client
+  task:
+    scheduling:
+      pool:
+        size: 1
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*
+    loadbalancer:
+      ribbon:
+        enabled: false
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/
+demo:
+  client:
+    service_host: demo-service
