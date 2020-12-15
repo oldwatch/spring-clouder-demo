@@ -139,6 +139,10 @@
                             <argument>JAR=${project.artifactId}.jar</argument>
                             <argument>--build-arg</argument>
                             <argument>PROFILE=docker</argument>
+                            <argument>--build-arg</argument>
+                            <argument>DEPENDENCY=target</argument>
+                            <argument>--file</argument>
+                            <argument>../Dockerfile</argument>
                             <argument>.</argument>
                         </arguments>
                     </configuration>
