@@ -11,6 +11,7 @@
         <module>config-service</module>
         <module>demo-service</module>
         <module>demo-client</module>
+        <module>reacter-client</module>
     </modules>
     <packaging>pom</packaging>
 

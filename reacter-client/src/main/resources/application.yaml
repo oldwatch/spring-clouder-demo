@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: reacter-client
+  task:
+    scheduling:
+      pool:
+        size: 1
+  cloud:
+    inetutils:
+      ignoredInterfaces:
+        - docker0
+        - veth.*
+eureka:
+  client:
+    register-with-eureka: false
+  serviceUrl:
+    defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/

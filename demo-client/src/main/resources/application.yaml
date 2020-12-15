@@ -18,7 +18,7 @@ eureka:
     register-with-eureka: false
 #    healthcheck:
 #      enabled: true
-#    serviceUrl:
-#      defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/
+    serviceUrl:
+      defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/
 #    registry-fetch-interval-seconds: 30
 #    eureka-service-url-poll-interval-seconds: 0
