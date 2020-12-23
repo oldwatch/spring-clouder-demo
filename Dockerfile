@@ -7,7 +7,7 @@ WORKDIR application
 ARG JAR_FILE=${DEPENDENCY}/${JAR}
 COPY ${JAR_FILE} application.jar
 RUN java -Djarmode=layertools -jar application.jar extract
-
+RUN  touch ./snapshot-dependencies/.blank
 FROM openjdk:11.0.7-slim
 WORKDIR app
 
