@@ -133,14 +133,11 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.6.0</version>
                     <configuration>
-                                                       <executable>podman</executable>
-                        <!--                                <arguments>  -->
-                        <!-- <executable>wsl</executable> -->
+                        <executable>podman</executable>
                         <arguments>
-                            <!-- <argument>docker</argument> -->
                             <argument>build</argument>
                             <argument>-t</argument>
-                            <argument>localhost:5000/local/${project.artifactId}</argument>
+                            <argument>local/${project.artifactId}</argument>
                             <argument>--build-arg</argument>
                             <argument>JAR=${project.artifactId}.jar</argument>
                             <argument>--build-arg</argument>

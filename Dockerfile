@@ -15,7 +15,7 @@ ARG PROFILE=docker
 
 ENV E_PROFILE ${PROFILE}
 
-EXPOSE 8080
+EXPOSE 8080  8761
 
 COPY --from=builder application/dependencies/ ./
 COPY --from=builder application/spring-boot-loader ./
