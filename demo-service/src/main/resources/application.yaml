@@ -12,6 +12,6 @@ eureka:
     lease-expiration-duration-in-seconds: 90
   client:
     serviceUrl:
-      defaultZone: http://eureka-service-1:8761/eureka/ ,http://eureka-service-2:8761/eureka/
+      defaultZone: http://eureka-service-1:8761/eureka , http://eureka-service-2:8761/eureka
     healthcheck:
       enabled: true

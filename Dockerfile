@@ -13,7 +13,7 @@ COPY ["./target/dependencies/", \
       "./target/snapshot-dependencies/", \
       "./target/application/", "./" ]
 
-HEALTHCHECK --interval=5m --timeout=3s  CMD STATUS= `curl -f http://localhost:8080/actuator/health|grep "UP"`; \
-    if [ -n $STATUS ];then; exit 0; else; exit 1; fi
+HEALTHCHECK --interval=5m --timeout=3s  CMD STATUS= `curl -f --silent  http://localhost:8080/actuator/health|grep "UP"`; \
+    if [ -n $STATUS ];then exit 0; else exit 1; fi;
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
