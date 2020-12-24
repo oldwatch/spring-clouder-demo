@@ -132,30 +132,30 @@
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>1.6.0</version>
-                    <configuration>
-                        <executable>podman</executable>
-                        <arguments>
-                            <argument>build</argument>
-                            <argument>-t</argument>
-                            <argument>local/${project.artifactId}</argument>
-                            <argument>--build-arg</argument>
-                            <argument>JAR=${project.artifactId}.jar</argument>
-                            <argument>--build-arg</argument>
-                            <argument>PROFILE=docker</argument>
-                            <argument>--build-arg</argument>
-                            <argument>DEPENDENCY=target</argument>
-                            <argument>--file</argument>
-                            <argument>../Dockerfile</argument>
-                            <argument>.</argument>
-                        </arguments>
-                    </configuration>
                     <executions>
                         <execution>
-                            <id>docker</id>
+                            <id>podman</id>
                             <phase>package</phase>
                             <goals>
                                 <goal>exec</goal>
                             </goals>
+                            <configuration>
+                                <executable>podman</executable>
+                                <arguments>
+                                    <argument>build</argument>
+                                    <argument>-t</argument>
+                                    <argument>local/${project.artifactId}</argument>
+                                    <argument>--build-arg</argument>
+                                    <argument>MODULE=${project.artifactId}</argument>
+                                    <argument>--build-arg</argument>
+                                    <argument>PROFILE=docker</argument>
+                                    <argument>--build-arg</argument>
+                                    <argument>DEPENDENCY=target</argument>
+                                    <argument>--file</argument>
+                                    <argument>../Dockerfile</argument>
+                                    <argument>.</argument>
+                                </arguments>    
+                            </configuration>
                         </execution>
                     </executions>
                 </plugin>

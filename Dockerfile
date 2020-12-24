@@ -1,28 +1,29 @@
 FROM adoptopenjdk:11-jre-hotspot as builder
 
 ARG DEPENDENCY
-ARG JAR
-
-WORKDIR application
-ARG JAR_FILE=${DEPENDENCY}/${JAR}
-COPY ${JAR_FILE} application.jar
-RUN java -Djarmode=layertools -jar application.jar extract
-RUN  touch ./snapshot-dependencies/.blank
-FROM openjdk:11.0.7-slim
-WORKDIR app
-
+ARG MODULE
 ARG PROFILE=docker
 
-ENV E_PROFILE ${PROFILE}
+WORKDIR ${MODULE}
+ARG JAR_FILE=${DEPENDENCY}/${MODULE}.jar
+
+ONBUILD COPY ${JAR_FILE} application.jar
+ONBUILD RUN java -Djarmode=layertools -jar application.jar extract
+ONBUILD RUN  touch ./snapshot-dependencies/.blank
+
+FROM openjdk:11.0.7-slim
+ARG MODULE
+WORKDIR ${MODULE}
+
+ENV SPRING_PROFILES_ACTIVE ${PROFILE}
 
 EXPOSE 8080  8761
 
-COPY --from=builder application/dependencies/ ./
-COPY --from=builder application/spring-boot-loader ./
-COPY --from=builder application/snapshot-dependencies/ ./
-COPY --from=builder application/application/ ./
+ONBUILD COPY --from=builder ${MODULE}/dependencies/ ./
+ONBUILD COPY --from=builder ${MODULE}/spring-boot-loader ./
+ONBUILD COPY --from=builder ${MODULE}/snapshot-dependencies/ ./
+ONBUILD COPY --from=builder ${MODULE}/application/ ./
 
-#COPY  ${DEPENDENCY}/${JAR}  /app/${JAR}
+#HEALTHCHECK --interval=5m --timeout=3s  CMD curl -f http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "org.springframework.boot.loader.JarLauncher"]
-#ENTRYPOINT java  "-Dspring.profiles.active=$E_PROFILE" -jar "/app/application.jar"
