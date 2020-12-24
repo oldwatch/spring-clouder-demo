@@ -134,6 +134,36 @@
                     <version>1.6.0</version>
                     <executions>
                         <execution>
+                            <id>unpack</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>java</executable>
+                                <workingDirectory>${project.build.directory}</workingDirectory>
+                                <arguments>
+                                    <argument>-Djarmode=layertools</argument>
+                                    <argument>-jar</argument>
+                                    <argument>${project.artifactId}.jar</argument>
+                                    <argument>extract</argument>
+                                </arguments>    
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>fillEmpty</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>exec</goal>
+                            </goals>
+                            <configuration>
+                                <executable>touch</executable>
+                                <arguments>
+                                    <argument>${project.build.directory}/snapshot-dependencies/.blank</argument>
+                                </arguments>    
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>podman</id>
                             <phase>package</phase>
                             <goals>
@@ -145,12 +175,6 @@
                                     <argument>build</argument>
                                     <argument>-t</argument>
                                     <argument>local/${project.artifactId}</argument>
-                                    <argument>--build-arg</argument>
-                                    <argument>MODULE=${project.artifactId}</argument>
-                                    <argument>--build-arg</argument>
-                                    <argument>PROFILE=docker</argument>
-                                    <argument>--build-arg</argument>
-                                    <argument>DEPENDENCY=target</argument>
                                     <argument>--file</argument>
                                     <argument>../Dockerfile</argument>
                                     <argument>.</argument>
