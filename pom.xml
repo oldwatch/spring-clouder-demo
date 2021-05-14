@@ -12,6 +12,7 @@
         <module>demo-service</module>
         <module>demo-client</module>
         <module>reacter-client</module>
+        <module>tech-web-demo</module>
     </modules>
     <packaging>pom</packaging>
 
@@ -32,10 +33,6 @@
 
 
     <dependencies>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.cloud</groupId>-->
-<!--            <artifactId>spring-cloud-starter-config</artifactId>-->
-<!--        </dependency>-->
 
 
         <dependency>

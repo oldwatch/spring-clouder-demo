@@ -1,0 +1,13 @@
+spring:
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          reactive:
+            function:
+              client: DEBUG
