@@ -66,32 +66,12 @@ public class TestPayCall {
 
         UriBuilder builder=factory.builder();
 
-        signTool.generPostParams(req,builder);
+        signTool.fillPostParams(req, builder);
 
         log.info("full Post params {}",builder.build());
     }
 
-    @Test
-    public void testReqGener(){
-        DemoReq req = getDemoReq();
 
-        UriBuilder builder=factory.builder();
-
-        signTool.generPostParams(req,builder);
-
-        log.info("full Post params {}",builder.build());
-    }
-
-    @Test
-    public void testPayGener(){
-        PayRequest req = getPayRequest();
-
-        UriBuilder builder=factory.builder();
-
-        signTool.generPostParams(req,builder);
-
-        log.info("full Post params {}",builder.build());
-    }
 
 
     private OrderQueryReq getQueryRequest() {

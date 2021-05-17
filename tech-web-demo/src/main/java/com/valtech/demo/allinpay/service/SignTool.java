@@ -13,7 +13,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.comparator.Comparators;
 import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriBuilderFactory;
 import reactor.core.publisher.Flux;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -116,7 +115,7 @@ public class SignTool {
         try {
             platformSignature.update(content.getBytes(Charsets.UTF_8));
 
-            return  platformSignature.verify(sign.getBytes());
+            return platformSignature.verify(Base64.getDecoder().decode(sign));
 
         } catch (SignatureException e) {
             log.error(" signature operate fail:content {}",content);
@@ -168,25 +167,26 @@ public class SignTool {
         }
 
         try {
-            return mapper.readValue(jsonStr,cls);
+            return mapper.readValue(jsonStr, cls);
         } catch (JsonProcessingException e) {
-            log.error("json parse to {} fail",cls.getName());
+            log.error("json parse to {} fail", cls.getName());
             throw new IllegalArgumentException(e);
         }
 
     }
 
-    public void generPostParams(SignRequest req,UriBuilder builder){
 
-        if(req.getRandomStr()==null) {
+    public void fillPostParams(SignRequest req, UriBuilder builder) {
+
+        if (req.getRandomStr() == null) {
             req.setRandomStr(RandomStringUtils.randomAlphanumeric(32));
         }
 
-        StringBuilder buffer=(StringBuilder)
+        StringBuilder buffer = (StringBuilder)
                 methodListCache.computeIfAbsent(req.getClass(), this::generMethodList)
-                .stream()
-                .reduce(new StringBuilder()
-                    , (BiFunction<StringBuilder, Tuple2<String, Method>, StringBuilder>) (sb, tuple) -> {
+                        .stream()
+                        .reduce(new StringBuilder()
+                                , (BiFunction<StringBuilder, Tuple2<String, Method>, StringBuilder>) (sb, tuple) -> {
                     try {
                         Object val = tuple.getT2().invoke(req);
                         if (val != null) {
@@ -205,7 +205,7 @@ public class SignTool {
         String sign=rsaSign(buffer.toString());
 
         builder.queryParam("sign",URLEncoder.encode(sign,Charsets.UTF_8));
-//        return buffer.toString()+"&sign="+sign;
+        return;
 
     }
 

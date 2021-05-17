@@ -9,8 +9,6 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.DefaultUriBuilderFactory;
-import org.springframework.web.util.UriBuilder;
-import org.springframework.web.util.UriBuilderFactory;
 
 @Slf4j
 @Component
@@ -35,8 +33,8 @@ public class PaymentService {
 
         webClient.post()
                 .uri("/apiweb/gateway/query",builder -> {
-                    signTool.generPostParams(req,builder);
-                    return builder.build();
+                    signTool.fillPostParams(req, builder);
+                    return builder.build(true);
                 })
                 .accept(MediaType.ALL)
                 .retrieve()
@@ -54,9 +52,9 @@ public class PaymentService {
     public void pay(PayRequest req){
 
         webClient.post()
-                .uri("/apiweb/gateway/pay",builder->{
-                    signTool.generPostParams(req,builder);
-                    return builder.build();
+                .uri("/apiweb/gateway/pay",builder-> {
+                    signTool.fillPostParams(req, builder);
+                    return builder.build(true);
                 })
                 .acceptCharset(Charsets.UTF_8)
                 .exchange()
