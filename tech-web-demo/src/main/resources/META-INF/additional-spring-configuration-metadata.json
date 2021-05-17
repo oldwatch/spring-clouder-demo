@@ -1,0 +1,20 @@
+{
+  "groups": [
+    {
+      "name": "com.valtech.demo.allinpay",
+      "type": "com.valtech.demo.allinpay.PayProperties"
+    }
+  ],
+  "properties": [
+    {
+      "name": "com.valtech.demo.allinpay.cert.platform_public_key",
+      "type": "java.lang.String",
+      "sourceType": "com.valtech.demo.allinpay.PayProperties"
+    },
+    {
+      "name": "com.valtech.demo.allinpay.cert.client_private_key",
+      "type": "java.lang.String",
+      "sourceType": "com.valtech.demo.allinpay.PayProperties"
+    }
+  ]
+}

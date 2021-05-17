@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
+import com.valtech.demo.allinpay.PayProperties;
 import com.valtech.demo.allinpay.entity.SignRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -32,47 +33,51 @@ import java.util.stream.Collectors;
 @Component
 public class SignTool {
 
-    private final static String PLATFORM_RSA_PK=
-            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYXfu4b7xgDSmEGQpQ8Sn3RzFgl5CE4gL4TbYrND4FtCYOrvbgLijkdFgIrVVWi2hUW" +
-                    "4K0PwBsmlYhXcbR+JSmqv9zviVXZiym0lK3glJGVCN86r9EPvNTusZZPm40TOEKMVENSYaUjCxZ7JzeZDfQ4WCeQQr2xirqn6" +
-                    "LdJjpZ5wIDAQAB";
 
-    private final static String CLIENT_RSA_PK=
-            "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAJgHMGYsspghvP+yCbjLG43CkZuQ3YJyDcmEKxvmgbl" +
-                    "ITfmiTPx2b9Y2iwDT9gnLGExTDm1BL2A8VzMobjaHfiCmTbDctu680MLmpDDkVXmJOqdlXh0tcLjhN4+iDA2KkRqiHxsDpiaKT6MMBuec" +
-                    "XQbJtPlVc1XjVhoUlzUgPCrvAgMBAAECgYAV9saYTGbfsdLOF5kYo0dve1JxaO7dFMCcgkV+z2ujKtNmeHtU54DlhZXJiytQY5Dhc10cj" +
-                    "b6xfFDrftuFcfKCaLiy6h5ETR8jyv5He6KH/+X6qkcGTkJBYG1XvyyFO3PxoszQAs0mrLCqq0UItlCDn0G72MR9/NuvdYabGHSzEQJBAM" +
-                    "XB1/DUvBTHHH4LiKDiaREruBb3QtP72JQS1ATVXA2v6xJzGPMWMBGQDvRfPvuCPVmbHENX+lRxMLp39OvIn6kCQQDEzYpPcuHW/7h3TYH" +
-                    "Yc+T0O6z1VKQT2Mxv92Lj35g1XqV4Oi9xrTj2DtMeV1lMx6n/3icobkCQtuvTI+AcqfTXAkB6bCz9NwUUK8sUsJktV9xJN/JnrTxetOr3" +
-                    "h8xfDaJGCuCQdFY+rj6lsLPBTnFUC+Vk4mQVwJIE0mmjFf22NWW5AkAmsVaRGkAmui41Xoq52MdZ8WWm8lY0BLrlBJlvveU6EPqtcZskW" +
-                    "W9KiU2euIO5IcRdpvrB6zNMgHpLD9GfMRcPAkBUWOV/dH13v8V2Y/Fzuag/y5k3/oXi/WQnIxdYbltad2xjmofJ7DbB7MJqiZZD8jlr8P" +
-                    "CZPwRNzc5ntDStc959";
+    private final PayProperties.AllInPayCert payProperties;
+
+//    private final static String PLATFORM_RSA_PK=
+//            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYXfu4b7xgDSmEGQpQ8Sn3RzFgl5CE4gL4TbYrND4FtCYOrvbgLijkdFgIrVVWi2hUW" +
+//                    "4K0PwBsmlYhXcbR+JSmqv9zviVXZiym0lK3glJGVCN86r9EPvNTusZZPm40TOEKMVENSYaUjCxZ7JzeZDfQ4WCeQQr2xirqn6" +
+//                    "LdJjpZ5wIDAQAB";
+//
+//    private final static String CLIENT_RSA_PK=
+//            "MIICdQIBADANBgkqhkiG9w0BAQEFAASCAl8wggJbAgEAAoGBAJgHMGYsspghvP+yCbjLG43CkZuQ3YJyDcmEKxvmgbl" +
+//                    "ITfmiTPx2b9Y2iwDT9gnLGExTDm1BL2A8VzMobjaHfiCmTbDctu680MLmpDDkVXmJOqdlXh0tcLjhN4+iDA2KkRqiHxsDpiaKT6MMBuec" +
+//                    "XQbJtPlVc1XjVhoUlzUgPCrvAgMBAAECgYAV9saYTGbfsdLOF5kYo0dve1JxaO7dFMCcgkV+z2ujKtNmeHtU54DlhZXJiytQY5Dhc10cj" +
+//                    "b6xfFDrftuFcfKCaLiy6h5ETR8jyv5He6KH/+X6qkcGTkJBYG1XvyyFO3PxoszQAs0mrLCqq0UItlCDn0G72MR9/NuvdYabGHSzEQJBAM" +
+//                    "XB1/DUvBTHHH4LiKDiaREruBb3QtP72JQS1ATVXA2v6xJzGPMWMBGQDvRfPvuCPVmbHENX+lRxMLp39OvIn6kCQQDEzYpPcuHW/7h3TYH" +
+//                    "Yc+T0O6z1VKQT2Mxv92Lj35g1XqV4Oi9xrTj2DtMeV1lMx6n/3icobkCQtuvTI+AcqfTXAkB6bCz9NwUUK8sUsJktV9xJN/JnrTxetOr3" +
+//                    "h8xfDaJGCuCQdFY+rj6lsLPBTnFUC+Vk4mQVwJIE0mmjFf22NWW5AkAmsVaRGkAmui41Xoq52MdZ8WWm8lY0BLrlBJlvveU6EPqtcZskW" +
+//                    "W9KiU2euIO5IcRdpvrB6zNMgHpLD9GfMRcPAkBUWOV/dH13v8V2Y/Fzuag/y5k3/oXi/WQnIxdYbltad2xjmofJ7DbB7MJqiZZD8jlr8P" +
+//                    "CZPwRNzc5ntDStc959";
 
     private final Signature clientSignature;
 
     private final Signature platformSignature;
 
-    private final ObjectMapper mapper=new ObjectMapper();
+    private final ObjectMapper mapper = new ObjectMapper();
 
-    public SignTool() throws NoSuchAlgorithmException {
+    public SignTool(PayProperties payProperties) throws NoSuchAlgorithmException {
+        this.payProperties = payProperties.getCert();
 
-        clientSignature=Signature
+        clientSignature = Signature
                 .getInstance("SHA1WithRSA");
 
-        platformSignature=Signature
+        platformSignature = Signature
                 .getInstance("SHA1WithRSA");
     }
 
     @PostConstruct
-    public void init(){
+    public void init() {
 
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-            PrivateKey priKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(CLIENT_RSA_PK)));
+            PrivateKey priKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(payProperties.getClientPrivateKey())));
             clientSignature.initSign(priKey);
 
-            PublicKey pubKey= keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(PLATFORM_RSA_PK)));
+            PublicKey pubKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(payProperties.getPlatformPublicKey())));
             platformSignature.initVerify(pubKey);
 
         }catch (GeneralSecurityException e) {
