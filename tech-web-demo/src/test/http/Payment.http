@@ -1,0 +1,12 @@
+POST http://localhost:8080/payment/submitWithPay
+Content-Type: application/json
+
+{
+  "orderID": "abcdef",
+  "goodsID": "demoGoodID",
+  "goodsInf": "demo goods",
+  "trxAmt": 1234.5,
+  "validTime": 30
+}
+
+###

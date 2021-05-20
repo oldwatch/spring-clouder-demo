@@ -10,11 +10,13 @@ import com.valtech.demo.allinpay.entity.SignRequest;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.comparator.Comparators;
 import org.springframework.web.util.UriBuilder;
+import reactor.cache.CacheMono;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.Signal;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -34,7 +36,7 @@ import java.util.stream.Collectors;
 public class SignTool {
 
 
-    private final PayProperties.AllInPayCert payProperties;
+    private final PayProperties.AllInPayCert certInfo;
 
 //    private final static String PLATFORM_RSA_PK=
 //            "MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDYXfu4b7xgDSmEGQpQ8Sn3RzFgl5CE4gL4TbYrND4FtCYOrvbgLijkdFgIrVVWi2hUW" +
@@ -59,7 +61,7 @@ public class SignTool {
     private final ObjectMapper mapper = new ObjectMapper();
 
     public SignTool(PayProperties payProperties) throws NoSuchAlgorithmException {
-        this.payProperties = payProperties.getCert();
+        this.certInfo = payProperties.getCert();
 
         clientSignature = Signature
                 .getInstance("SHA1WithRSA");
@@ -74,29 +76,42 @@ public class SignTool {
         try {
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
-            PrivateKey priKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(payProperties.getClientPrivateKey())));
+            PrivateKey priKey = keyFactory.generatePrivate(new PKCS8EncodedKeySpec(Base64.getDecoder().decode(certInfo.getClientPrivateKey())));
             clientSignature.initSign(priKey);
 
-            PublicKey pubKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(payProperties.getPlatformPublicKey())));
+            PublicKey pubKey = keyFactory.generatePublic(new X509EncodedKeySpec(Base64.getDecoder().decode(certInfo.getPlatformPublicKey())));
             platformSignature.initVerify(pubKey);
 
         }catch (GeneralSecurityException e) {
             log.error("init RSA signature tool fail ");
             throw new IllegalArgumentException(e);
         }
+
+
     }
 
-    private final Map<Class, List<Tuple2<String,Method>>> methodListCache= Maps.newConcurrentMap();
+    private final Map<Class, List<Tuple2<String, Method>>> methodListCache = Maps.newConcurrentMap();
 
 
-    private List<Tuple2<String,Method>> generMethodList(Class<? extends  SignRequest> cls){
+    private Mono<List<Tuple2<String, Method>>> getCachedMono(Class<? extends SignRequest> entryCls) {
 
-        return Flux.fromArray(cls.getMethods())
-                .filter((m)-> m.getName().startsWith("get")&&(!m.getName().equals("getClass")))
-                .map((m)-> Tuples.of(m.getName().substring(3).toLowerCase(Locale.ROOT),m))
-                .sort((t1,t2)-> Comparators.comparable().compare(t1.getT1(),t2.getT1()))
-                .toStream().collect(Collectors.toList());
+        return CacheMono
+                .lookup(cls -> Mono.justOrEmpty(methodListCache.get(cls))
+                                .map(Signal::next),
+                        entryCls)
+                .onCacheMissResume(() -> Mono.just(generMethodList(entryCls)))
+                .andWriteWith((k, sig) -> Mono.fromRunnable(() ->
+                        methodListCache.putIfAbsent(k, sig.get())
+                ));
+    }
 
+    private List<Tuple2<String, Method>> generMethodList(Class<? extends SignRequest> cls) {
+
+        return Arrays.stream(cls.getMethods())
+                .filter((m) -> m.getName().startsWith("get") && (!m.getName().equals("getClass")))
+                .map((m) -> Tuples.of(m.getName().substring(3).toLowerCase(Locale.ROOT), m))
+                .sorted((t1, t2) -> Comparators.comparable().compare(t1.getT1(), t2.getT1()))
+                .collect(Collectors.toList());
     }
 
 
@@ -172,7 +187,7 @@ public class SignTool {
         }
 
         try {
-            return mapper.readValue(jsonStr, cls);
+            return mapper.treeToValue(node, cls);
         } catch (JsonProcessingException e) {
             log.error("json parse to {} fail", cls.getName());
             throw new IllegalArgumentException(e);
@@ -180,28 +195,53 @@ public class SignTool {
 
     }
 
+    public Mono<UriBuilder> reactivePostParams(SignRequest req, UriBuilder builder) {
 
-    public void fillPostParams(SignRequest req, UriBuilder builder) {
-
-        if (req.getRandomStr() == null) {
-            req.setRandomStr(RandomStringUtils.randomAlphanumeric(32));
-        }
-
-        StringBuilder buffer = (StringBuilder)
-                methodListCache.computeIfAbsent(req.getClass(), this::generMethodList)
-                        .stream()
-                        .reduce(new StringBuilder()
-                                , (BiFunction<StringBuilder, Tuple2<String, Method>, StringBuilder>) (sb, tuple) -> {
+        return getCachedMono(req.getClass())
+                .flatMapMany(list -> Flux.fromIterable(list))
+                .reduce(new StringBuilder(), (sb, tuple) -> {
                     try {
                         Object val = tuple.getT2().invoke(req);
                         if (val != null) {
-                            builder.queryParam(tuple.getT1(),URLEncoder.encode(String.valueOf(val),Charsets.UTF_8));
+                            builder.queryParam(tuple.getT1(), URLEncoder.encode(String.valueOf(val), Charsets.UTF_8));
                             sb.append("&").append(tuple.getT1()).append("=").append(val);
                         }
                     } catch (Exception e) {
                         log.warn(" read field {} error ", tuple.getT1());
                     }
                     return sb;
+                })
+                .map(buffer -> {
+
+                    buffer.deleteCharAt(0);
+
+                    String sign = rsaSign(buffer.toString());
+
+                    builder.queryParam("sign", URLEncoder.encode(sign, Charsets.UTF_8));
+
+                    return builder;
+
+                });
+    }
+
+    public void fillPostParams(SignRequest req, UriBuilder builder) {
+
+
+        StringBuilder buffer =
+                (StringBuilder) methodListCache.computeIfAbsent(req.getClass(), this::generMethodList)
+                        .stream()
+                        .reduce(new StringBuilder()
+                                , (BiFunction<StringBuilder, Tuple2<String, Method>, StringBuilder>) (sb, tuple) -> {
+                                    try {
+                                        Object val = tuple.getT2().invoke(req);
+                                        if (val != null) {
+                                            builder.queryParam(tuple.getT1(), URLEncoder.encode(String.valueOf(val), Charsets.UTF_8));
+                                            sb.append("&").append(tuple.getT1()).append("=").append(val);
+                                        }
+                                    } catch (Exception e) {
+                                        log.warn(" read field {} error ", tuple.getT1());
+                                    }
+                                    return sb;
                     }
                     ,(BinaryOperator<StringBuilder>) (sb1, sb2)->sb1.append(sb2));
 

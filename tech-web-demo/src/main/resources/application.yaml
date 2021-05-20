@@ -1,0 +1,21 @@
+spring:
+  jackson:
+    default-property-inclusion: non_null
+    deserialization:
+      fail-on-unknown-properties: false
+logging:
+  level:
+    org:
+      springframework:
+        web:
+          reactive:
+            function:
+              client: DEBUG
+com:
+  valtech:
+    demo:
+      allinpay:
+        ret_url: "www.bing.com"
+        cert:
+          cus_id: "990581007426001"
+          app_id: "00000051"
