@@ -112,7 +112,7 @@ public class SignTool {
                 .filter((m) -> m.getName().startsWith("get") && (!m.getName().equals("getClass")))
                 .map((m) -> Tuples.of(m.getName().substring(3).toLowerCase(Locale.ROOT), m))
                 .sort((t1, t2) -> Comparators.comparable().compare(t1.getT1(), t2.getT1()))
-                .collectList();
+                .collectList().log();
     }
 
 
