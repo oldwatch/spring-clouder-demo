@@ -99,11 +99,22 @@ public class SignTool {
                 .lookup(cls -> Mono.justOrEmpty(methodListCache.get(cls))
                                 .map(Signal::next),
                         entryCls)
-                .onCacheMissResume(() -> Mono.just(generMethodList(entryCls)))
+                .onCacheMissResume(() -> generMethodListMono(entryCls))
                 .andWriteWith((k, sig) -> Mono.fromRunnable(() ->
                         methodListCache.putIfAbsent(k, sig.get())
                 ));
     }
+
+
+    private Mono<List<Tuple2<String, Method>>> generMethodListMono(Class<? extends SignRequest> cls) {
+
+        return Flux.fromArray(cls.getMethods())
+                .filter((m) -> m.getName().startsWith("get") && (!m.getName().equals("getClass")))
+                .map((m) -> Tuples.of(m.getName().substring(3).toLowerCase(Locale.ROOT), m))
+                .sort((t1, t2) -> Comparators.comparable().compare(t1.getT1(), t2.getT1()))
+                .collectList();
+    }
+
 
     private List<Tuple2<String, Method>> generMethodList(Class<? extends SignRequest> cls) {
 

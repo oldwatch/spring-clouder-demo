@@ -70,7 +70,7 @@ public class PaymentService {
 
         return signTool
                 .reactivePostParams(req, factory.builder())
-                .map(builder -> builder.build());
+                .map(builder -> builder.build()).log();
     }
 
     public void pay(PayRequest req) {

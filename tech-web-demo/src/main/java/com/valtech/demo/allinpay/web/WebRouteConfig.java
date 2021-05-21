@@ -23,8 +23,7 @@ public class WebRouteConfig {
 
     @Bean
     public RouterFunction<ServerResponse> routerFunction() {
-        return route(POST("/payment/submitWithPay"), this::submitAndPay)
-                ;
+        return route(POST("/payment/submitWithPay"), this::submitAndPay);
     }
 
     private Mono<ServerResponse> submitAndPay(ServerRequest request) {
@@ -32,7 +31,7 @@ public class WebRouteConfig {
                 .map(vo -> vo.generPayRequest())
                 .flatMap(param -> paymentService.payUrl(param))
                 .flatMap(url -> ServerResponse
-                        .permanentRedirect(url)
+                        .seeOther(url)
                         .build());
     }
 }
