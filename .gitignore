@@ -6,4 +6,7 @@
 
 **/*.iml
 
+*.ipr
+*.iws
+
 target
